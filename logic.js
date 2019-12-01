@@ -20,10 +20,10 @@ $(document).ready(function () {
         var dest = $('#dest').val().trim();
         var depart = $('#first-depart').val().trim();
         var freq = $('#freq').val().trim();
-        console.log(name)
-        console.log(dest)
-        console.log(depart)
-        console.log(freq)
+        // console.log(name)
+        // console.log(dest)
+        // console.log(depart)
+        // console.log(freq)
 
         database.ref().push({
             name: name,
@@ -38,12 +38,46 @@ $(document).ready(function () {
 
     database.ref().on('child_added', function (childSnapshot) {
         var snap = childSnapshot.val();
+        var added = snap.dateAdded;
+        // console.log(added);
+
         var nameSnap = snap.name;
         var destSnap = snap.destination;
         var departSnap = snap.firstDepart;
         var freqSnap = snap.frequency;
+        // console.log(departSnap);
+        //This will be the firstDeparture time as a moment
+        var startTime = moment(departSnap, 'HH:mm');
+        // If we grab the minute and hour, we can convert it into a time to subtract the current time from
+        var startMinute = startTime.minute();
+        var startHour = startTime.hour();
+        // console.log(startHour);
+        // console.log(startTime);
+        var today = moment();
+        // console.log(today);
+        var nowHour = today.hour();
+        // console.log(nowHour);
+        var nowMinute = today.minute();
+        var next = (nowHour * 60 + nowMinute) + (freqSnap - (((nowHour * 60 + nowMinute) - (startHour * 60 + startMinute)) % freqSnap));
+        var nextMinute = next % 60;
+        var nextHour = (next - nextMinute) / 60;
+        // console.log(nextMinute);
+        // console.log(nextHour);
+        var nextTrain = nextHour.toString() + ':' + nextMinute
+        // console.log(nextTrain);
 
-        $('#train-show').append('<tr> <td>' + nameSnap + '</td> <td>' + destSnap + '</td> <td>' + departSnap + '</td> <td>' + freqSnap + '</td> <td>' + '</td> <td>' + '</td> </tr>')
+
+
+        console.log(next);
+
+        $('#train-show').append('<tr> <td>' + nameSnap + '</td> <td>' + destSnap + '</td> <td>' + departSnap + '</td> <td>' + freqSnap + '</td> <td>' + nextTrain + '</td> <td>' + '</td> </tr>')
     })
+    //This will reload the page every minute so that the time will update!
+    setTimeout(function () {
+        location.reload();
+    }, 60000);
 })
+
+
+
 
